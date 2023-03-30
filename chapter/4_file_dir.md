@@ -3,7 +3,7 @@
 ## 一、 stat 结构和权限相关
 1. 四个`stat`函数：返回文件或者目录的信息结构：
 
-	```
+	```c
 	#include<sys/stat.h>
 	int stat(const char * restrict pathname, struct stat*restrict buf);
 	int fstat(int fd, struct stat* buf);
@@ -67,7 +67,7 @@
 	time_t tv_sec;	// 秒
 	long tv_nsec; 	//纳秒
 		}
-```
+    ```
 
 3. UNIX 文件类型：
 	- 普通文件：最常见的文件类型，这种文件包含了某种形式的数据。至于这种数据是二进制还是文本，对内核无区别。普通文件的内容解释由具体的应用程序进行。
@@ -706,24 +706,24 @@ void test_link_unlink()
 
 11. 符号链接示例：在`main`函数中调用`test_symlink_readlink`函数：
 
-	```
-void test_symlink_readlink()
-{
-    M_TRACE("---------  Begin test_symlink_readlink()  ---------\n");
-    assert(prepare_file("test","abcdefg0123456",14,S_IRWXU)==0); // 准备 test 文件
-    print_file_type("test"); // 查看 test 文件类型
+	```c
+    void test_symlink_readlink()
+    {
+        M_TRACE("---------  Begin test_symlink_readlink()  ---------\n");
+        assert(prepare_file("test","abcdefg0123456",14,S_IRWXU)==0); // 准备 test 文件
+        print_file_type("test"); // 查看 test 文件类型
 
-    My_symlink("test","test_symlink"); // 创建软连接 test_symlink 到 test
-    print_file_type("test_symlink"); // 查看 test_symlink 文件类型
-    print_link_file("test_symlink"); // 由于open 是链接跟随，所以这里打印 test 的内容
+        My_symlink("test","test_symlink"); // 创建软连接 test_symlink 到 test
+        print_file_type("test_symlink"); // 查看 test_symlink 文件类型
+        print_link_file("test_symlink"); // 由于open 是链接跟随，所以这里打印 test 的内容
 
-    char buffer[128];
-    My_readlink("test_symlink",buffer,128);
+        char buffer[128];
+        My_readlink("test_symlink",buffer,128);
 
-    un_prepare_file("test"); // 删除 test 文件
-    un_prepare_file("test_symlink"); // 删除 test_symlink 文件
-    M_TRACE("---------  End test_symlink_readlink()  ---------\n\n");
-}
+        un_prepare_file("test"); // 删除 test 文件
+        un_prepare_file("test_symlink"); // 删除 test_symlink 文件
+        M_TRACE("---------  End test_symlink_readlink()  ---------\n\n");
+    }
 
 
 	```
@@ -749,7 +749,7 @@ void test_symlink_readlink()
 
 2. `futimens/utimensat/utimes`函数：修改文件的访问和修改时间
 
-	```
+	```c
 	#include<sys/stat.h>
 	int futimens(int fd,const struct timespec times[2]);
 	int utimensat(int fd,const char*path,const struct timespec times[2],int flag);
@@ -808,28 +808,28 @@ void test_symlink_readlink()
 
 3. 示例：在 `main`函数中调用`test_utimes`函数： 
 
-	```
-void test_utimes()
-{
-    M_TRACE("---------  Begin test_utimes()  ---------\n");
-    assert(prepare_file("test",NULL,0,S_IRWXU)==0); // 准备 test 文件
-    print_file_time("test");
-    sleep(2);
-    My_access("test",F_OK); // 访问文件，但不修改文件
-    print_file_time("test");
-    sleep(2);
-    My_chmod("test",S_IRUSR|S_IWUSR);//  修改文件状态
-    print_file_time("test");
+	```c
+   void test_utimes()
+   {
+       M_TRACE("---------  Begin test_utimes()  ---------\n");
+       assert(prepare_file("test",NULL,0,S_IRWXU)==0); // 准备 test 文件
+       print_file_time("test");
+       sleep(2);
+       My_access("test",F_OK); // 访问文件，但不修改文件
+       print_file_time("test");
+       sleep(2);
+       My_chmod("test",S_IRUSR|S_IWUSR);//  修改文件状态
+       print_file_time("test");
 
-    struct timeval times[2];
-    times[0].tv_usec=10;
-    times[1].tv_sec=10;
-    times[1].tv_usec=10;
-    My_utimes("test",times);
+       struct timeval times[2];
+       times[0].tv_usec=10;
+       times[1].tv_sec=10;
+       times[1].tv_usec=10;
+       My_utimes("test",times);
 
-    un_prepare_file("test"); // 删除 test 文件
-    M_TRACE("---------  End test_utimes()  ---------\n\n");
-}
+       un_prepare_file("test"); // 删除 test 文件
+       M_TRACE("---------  End test_utimes()  ---------\n\n");
+   }
 	```
 
 	  ![utimes](../imgs/file_dir/utimes.JPG) 	
@@ -886,7 +886,7 @@ void test_utimes()
 3. 读、写目录：对于某个目录具有访问权限的任何用户都可以读该目录。但是为了防止文件系统产生混乱，只有内核才能写目录。
 	> 一个目录的写权限和执行权限位决定了在该目录中能否创建新文件以及删除文件，它们并不能写目录本身
 
-	```
+	```c
 	#include<dirent.h>
 	DIR *opendir(const char *pathname);
 	DIR *fdopendir(int fd);
@@ -921,7 +921,7 @@ void test_utimes()
 	对于 `DIR`结构，它是一个内部结构。起作用类似于 `FILE`结构。
 	对于`dirent`结构，它是定义在`<dirent.h>`头文件中。其与具体操作系统相关。但是它至少定义了两个成员：
 
-	```
+	```c
 	struct dirent{
 	ino_t d_ino; // i 节点编号
 	char d_name[];// 以 null 结尾的文件名字符串
@@ -957,41 +957,41 @@ void test_utimes()
 
 5. 示例： 在`main`函数中调用 `test_dir_operations` 函数：
 
-	```
-void test_dir_operations()
-{
-    M_TRACE("---------  Begin test_dir_operations()  ---------\n");
-    //*** 创建目录 ****
-    My_mkdir("test",S_IRWXU);
-    My_mkdir("test/test1",S_IRWXU);
+	```c
+   void test_dir_operations()
+   {
+       M_TRACE("---------  Begin test_dir_operations()  ---------\n");
+       //*** 创建目录 ****
+       My_mkdir("test",S_IRWXU);
+       My_mkdir("test/test1",S_IRWXU);
 
-    //*** 创建文件
-    prepare_file("test/tfile_1",NULL,0,S_IRWXU);
-    prepare_file("test/tfile_2",NULL,0,S_IRWXU);
-    prepare_file("test/tfile_3",NULL,0,S_IRWXU);
-    prepare_file("test/test1/tfile_11",NULL,0,S_IRWXU);
-    prepare_file("test/test1/tfile_22",NULL,0,S_IRWXU);
-    prepare_file("test/test1/tfile_33",NULL,0,S_IRWXU);
+       //*** 创建文件
+       prepare_file("test/tfile_1",NULL,0,S_IRWXU);
+       prepare_file("test/tfile_2",NULL,0,S_IRWXU);
+       prepare_file("test/tfile_3",NULL,0,S_IRWXU);
+       prepare_file("test/test1/tfile_11",NULL,0,S_IRWXU);
+       prepare_file("test/test1/tfile_22",NULL,0,S_IRWXU);
+       prepare_file("test/test1/tfile_33",NULL,0,S_IRWXU);
 
-    print_dir("test");
+       print_dir("test");
 
-    print_cwd();
-    My_chdir("test");
-    print_cwd();
-    My_chdir("../"); // 切换回来，否则后面的删除文件都会失败（因为都是相对路径）
-    print_cwd();
-    //***** 清理
-    My_rmdir("test"); // 目录非空，删除失败！
-    un_prepare_file("test/tfile_1");
-    un_prepare_file("test/tfile_2");
-    un_prepare_file("test/tfile_3");
-    un_prepare_file("test/test1/tfile_11");
-    un_prepare_file("test/test1/tfile_22");
-    un_prepare_file("test/test1/tfile_33");
-    My_rmdir("test/test1"); // 必须非空才能删除成功
-    My_rmdir("test"); // 必须非空才能删除成功
-    M_TRACE("---------  End test_dir_operations()  ---------\n\n");
-}
+       print_cwd();
+       My_chdir("test");
+       print_cwd();
+       My_chdir("../"); // 切换回来，否则后面的删除文件都会失败（因为都是相对路径）
+       print_cwd();
+       //***** 清理
+       My_rmdir("test"); // 目录非空，删除失败！
+       un_prepare_file("test/tfile_1");
+       un_prepare_file("test/tfile_2");
+       un_prepare_file("test/tfile_3");
+       un_prepare_file("test/test1/tfile_11");
+       un_prepare_file("test/test1/tfile_22");
+       un_prepare_file("test/test1/tfile_33");
+       My_rmdir("test/test1"); // 必须非空才能删除成功
+       My_rmdir("test"); // 必须非空才能删除成功
+       M_TRACE("---------  End test_dir_operations()  ---------\n\n");
+   }
 	```
 
 	  ![dir_function](../imgs/file_dir/dir_function.JPG) 
